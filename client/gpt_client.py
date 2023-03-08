@@ -77,8 +77,6 @@ if __name__ == "__main__":
     outputs = []
     input_name = "INPUT_0"
     output_name = "OUTPUT_0"
-
-    text_data = [args.text]
     
     input_0 = np.array([["Suomen paras kaupunki on"]]).astype(object)
     
