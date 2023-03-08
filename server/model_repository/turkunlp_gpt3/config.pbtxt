@@ -8,6 +8,13 @@ input [
     dims: [ 1 ]
   }
 ]
+input [
+  {
+    name: "temperature"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  }
+]
 output [
   {
     name: "OUTPUT_0"

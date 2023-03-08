@@ -27,21 +27,17 @@
 import os, sys
 import numpy as np
 import json
-import tritongrpcclient
-#from tritonclient.grpc import InferenceServerClient, InferInput, InferRequestedOutput
 from tritonclient import utils as client_utils
 
 import tritonclient.http as httpclient
 
 import argparse
 
+def prepare_input(name, input_dat):
+    infer_input = httpclient.InferInput(name, input_dat.shape, client_utils.np_to_triton_dtype(input_dat.dtype))
+    infer_input.set_data_from_numpy(input_dat)
+    return infer_input
 
-def load_image(img_path: str):
-    """
-    Loads an encoded image as an array of bytes.
-    
-    """
-    return np.fromfile(img_path, dtype='uint8')
 
 
 if __name__ == "__main__":
@@ -74,21 +70,19 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = []
-    outputs = []
-    input_name = "INPUT_0"
-    output_name = "OUTPUT_0"
-    
+
     input_0 = np.array([["Suomen paras kaupunki on"]]).astype(object)
+    B = len(input_0) #batch size
+    temperature = np.array([[0.8]]).astype(np.float32)
     
-    infer_input = httpclient.InferInput(input_name, input_0.shape, client_utils.np_to_triton_dtype(input_0.dtype))
-    infer_input.set_data_from_numpy(input_0)
-    
-    inputs = [infer_input]
+    inputs = [
+        prepare_input("INPUT_0",input_0),
+        prepare_input("temperature",temperature)
+    ]
 
     results = triton_client.infer(model_name=args.model_name,
                                   inputs=inputs)
 
-    print(results)
+    output_name = "OUTPUT_0"
     output0_data = [item.decode("utf-8") for item in results.as_numpy(output_name)]
     print(output0_data[0])
-    #maxs = np.argmax(output0_data, axis=1)
