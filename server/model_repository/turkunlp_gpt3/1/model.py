@@ -66,8 +66,8 @@ class TritonPythonModel:
         self.output0_dtype = pb_utils.triton_string_to_numpy(
             output0_config['data_type'])
         #print("model_repository",args["model_repository"])
-        self.tokenizer = AutoTokenizer.from_pretrained("/models/turkunlp_bloom/1/hf_files")
-        self.model = AutoModelForCausalLM.from_pretrained("/models/turkunlp_bloom/1/hf_files").to("cuda")
+        self.tokenizer = AutoTokenizer.from_pretrained("/models/turkunlp_gpt3/1/hf_files")
+        self.model = AutoModelForCausalLM.from_pretrained("/models/turkunlp_gpt3/1/hf_files").to("cuda")
 
     def execute(self, requests):
         """`execute` MUST be implemented in every Python model. `execute`
