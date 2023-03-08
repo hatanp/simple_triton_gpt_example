@@ -8,4 +8,4 @@ export HF_TRANSFORMERS_CACHE=/media/volume/cache/hf/transformers/
 export TRANSFORMERS_CACHE=/media/volume/cache/hf/transformers/
 export TMPDIR=/media/volume/cache/tmp
 
-sudo docker run --shm-size 1g -it --gpus=1 --rm -p8000:8000 -p8001:8001 -p8002:8002 -v/media/volume/triton/simple_triton_gpt_example/server/model_repository:/models nvcr.io/nvidia/tritonserver:23.01-py3 pip install transformers torch && tritonserver --model-repository=/models
+sudo docker run --shm-size 1g -it --gpus=1 --rm -p8000:8000 -p8001:8001 -p8002:8002 -v/media/volume/triton/simple_triton_gpt_example/server/model_repository:/models nvcr.io/nvidia/tritonserver:23.01-py3 sh -c "pip install transformers torch && tritonserver --model-repository=/models"
