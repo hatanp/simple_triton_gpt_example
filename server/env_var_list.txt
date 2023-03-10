@@ -1,0 +1,9 @@
+#These might or might not be relevant
+WORKDIR=/tmp/host/tmp/
+HF_DATASETS_CACHE=/tmp/host/hf/datasets/
+HF_METRICS_CACHE=/tmp/host/hf/metrics/
+HF_MODULES_CACHE=/tmp/host/hf/modules/
+HF_TRANSFORMERS_CACHE=/tmp/host/hf/transformers/
+TRANSFORMERS_CACHE=/tmp/host/hf/transformers/
+HF_HOME=/tmp/host/hf
+TMPDIR=/tmp/host/tmp
