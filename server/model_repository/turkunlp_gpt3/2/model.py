@@ -66,8 +66,8 @@ class TritonPythonModel:
         self.output0_dtype = pb_utils.triton_string_to_numpy(
             output0_config['data_type'])
         #print("model_repository",args["model_repository"])
-        self.tokenizer = AutoTokenizer.from_pretrained("TurkuNLP/gpt3-finnish-large")
-        self.model = AutoModelForCausalLM.from_pretrained("TurkuNLP/gpt3-finnish-large").to("cuda")
+        self.tokenizer = AutoTokenizer.from_pretrained("TurkuNLP/gpt3-finnish-13B")
+        self.model = AutoModelForCausalLM.from_pretrained("TurkuNLP/gpt3-finnish-13B")
 
     def execute(self, requests):
         """`execute` MUST be implemented in every Python model. `execute`
@@ -103,7 +103,7 @@ class TritonPythonModel:
             temp = pb_utils.get_input_tensor_by_name(request, "temperature").as_numpy()[0][0].item() #Assume that whole batch has same temperature. No idea how to define this otherwise..
 
             text_in = [item[0].decode('utf-8') for item in in_0] #input is size [B,1] 
-            inputs = self.tokenizer(text_in, return_tensors="pt").to("cuda")
+            inputs = self.tokenizer(text_in, return_tensors="pt")
             gen_tokens = self.model.generate(**inputs,do_sample=True,temperature=temp, min_length=1,max_length=512)
             out_0 = self.tokenizer.batch_decode(gen_tokens)
 

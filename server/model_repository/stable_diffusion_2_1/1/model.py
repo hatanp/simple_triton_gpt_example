@@ -30,7 +30,7 @@ import json
 # contains some utility functions for extracting information from model_config
 # and converting Triton input/output types to numpy types.
 import triton_python_backend_utils as pb_utils
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 #from optimum.onnxruntime import ORTModelForCausalLM
 import numpy as np
 import torch
@@ -66,8 +66,13 @@ class TritonPythonModel:
         self.output0_dtype = pb_utils.triton_string_to_numpy(
             output0_config['data_type'])
         #print("model_repository",args["model_repository"])
-        self.tokenizer = AutoTokenizer.from_pretrained("TurkuNLP/gpt3-finnish-large")
-        self.model = AutoModelForCausalLM.from_pretrained("TurkuNLP/gpt3-finnish-large").to("cuda")
+        model_id = "stabilityai/stable-diffusion-2-1"
+
+        # Use the DPMSolverMultistepScheduler (DPM-Solver++) scheduler here instead
+        pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+        pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+        pipe.enable_attention_slicing()
+        self.pipe = pipe.to("cuda")
 
     def execute(self, requests):
         """`execute` MUST be implemented in every Python model. `execute`
@@ -100,15 +105,21 @@ class TritonPythonModel:
         for request in requests:
             # Get INPUT0
             in_0 = pb_utils.get_input_tensor_by_name(request, "INPUT_0").as_numpy()
-            temp = pb_utils.get_input_tensor_by_name(request, "temperature").as_numpy()[0][0].item() #Assume that whole batch has same temperature. No idea how to define this otherwise..
 
             text_in = [item[0].decode('utf-8') for item in in_0] #input is size [B,1] 
-            inputs = self.tokenizer(text_in, return_tensors="pt").to("cuda")
-            gen_tokens = self.model.generate(**inputs,do_sample=True,temperature=temp, min_length=1,max_length=512)
-            out_0 = self.tokenizer.batch_decode(gen_tokens)
 
-            out_tensor_0 = pb_utils.Tensor("OUTPUT_0",
-                                           np.array([item.encode("utf-8") for item in out_0]).astype(output0_dtype))
+            #inputs = self.tokenizer(text_in, return_tensors="pt").to("cuda")
+            #gen_tokens = self.model.generate(**inputs,do_sample=True,temperature=temp, min_length=1,max_length=512)
+            #out_0 = self.tokenizer.batch_decode(gen_tokens)
+
+            prompt = text_in[0]
+            images = self.pipe(prompt).images
+            image = np.asarray(images[0])
+            #print(image.shape,image.dtype,len(images), images)
+
+            out_0 = [str(image.shape)]
+
+            out_tensor_0 = pb_utils.Tensor("OUTPUT_0",image)
 
             # Create InferenceResponse. You can set an error here in case
             # there was a problem with handling this inference request.
