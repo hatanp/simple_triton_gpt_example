@@ -45,7 +45,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name",
                         type=str,
                         required=False,
-                        default="turkunlp_gpt3",
+                        default="turkunlp_gpt3_13B",
                         help="Model name")
     parser.add_argument("--url",
                         type=str,

@@ -104,7 +104,7 @@ class TritonPythonModel:
 
             text_in = [item[0].decode('utf-8') for item in in_0] #input is size [B,1] 
             inputs = self.tokenizer(text_in, return_tensors="pt")
-            gen_tokens = self.model.generate(**inputs,do_sample=True,temperature=temp, min_length=1,max_length=512)
+            gen_tokens = self.model.generate(**inputs,do_sample=True,temperature=temp, min_length=1,max_length=40)
             out_0 = self.tokenizer.batch_decode(gen_tokens)
 
             out_tensor_0 = pb_utils.Tensor("OUTPUT_0",
