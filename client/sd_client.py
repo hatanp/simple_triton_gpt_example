@@ -59,6 +59,10 @@ if __name__ == "__main__":
                         required=False,
                         default=False,
                         help='Enable verbose output')
+    parser.add_argument("-p",
+                        "--prompt",
+                        type=str,
+                        default="An avocado chair")
     args = parser.parse_args()
 
     try:
@@ -72,7 +76,7 @@ if __name__ == "__main__":
 
     inputs = []
 
-    input_0 = np.array([["An avocado chair"]]).astype(object)
+    input_0 = np.array([[args.prompt]]).astype(object)
     
     inputs = [
         prepare_input("INPUT_0",input_0)
