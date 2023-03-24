@@ -42,11 +42,6 @@ def prepare_input(name, input_dat):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name",
-                        type=str,
-                        required=False,
-                        default="turkunlp_gpt3",
-                        help="Model name")
     parser.add_argument("--url",
                         type=str,
                         required=False,
@@ -61,26 +56,44 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
-        #triton_client = tritonclient.grpc.InferenceServerClient(
-        #    url=args.url, verbose=args.verbose)
         triton_client = httpclient.InferenceServerClient(
             url=args.url, verbose=args.verbose)
     except Exception as e:
         print("channel creation failed: " + str(e))
         sys.exit(1)
 
-    inputs = []
 
-    input_0 = np.array([["Suomen paras kaupunki on"]]).astype(object)
-    B = len(input_0) #batch size
-    temperature = np.array([[0.8]]).astype(np.float32)
-    
+    #Required model selected:
+    model_name = "turkunlp_gpt3_small" #Could also be turkunlp_gpt3_13b but that is not in production API yet
+
+    #Required inputs, comments in the form of (min:default:max):
+    #Text
+    input_0 = np.array([["Suomen paras kaupunki on"]]).astype(object)#No limitations, free text input with max length hard to define.
+    #Float:
+    temperature = np.array([[1.0]]).astype(np.float32)#0:1.0:2.0
+    top_p = np.array([[1.0]]).astype(np.float32)#0:1.0:2.0
+    #integer:
+    top_k = np.array([[50]]).astype(np.int32)#0:50:200
+    min_new_tokens = np.array([[1]]).astype(np.int32)#1:10:512
+    max_new_tokens = np.array([[10]]).astype(np.int32)#1:50:512
+    min_length = np.array([[1]]).astype(np.int32)#1:10:512
+    max_length = np.array([[150]]).astype(np.int32)#1:150:512
+    #Boolean
+    do_sample = np.array([[True]]).astype(bool)#False:True:True
+
+    inputs = []
     inputs = [
         prepare_input("INPUT_0",input_0),
-        prepare_input("temperature",temperature)
+        prepare_input("temperature",temperature),
+        prepare_input("top_p",top_p),
+        prepare_input("top_k",top_k),
+        prepare_input("min_new_tokens",min_new_tokens),
+        prepare_input("max_new_tokens",max_new_tokens),
+        prepare_input("min_length",min_length),
+        prepare_input("max_length",max_length),
+        prepare_input("do_sample",do_sample),
     ]
-
-    results = triton_client.infer(model_name=args.model_name,model_version="1",
+    results = triton_client.infer(model_name=model_name,model_version="1",
                                   inputs=inputs)
 
     output_name = "OUTPUT_0"
